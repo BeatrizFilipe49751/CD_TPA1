@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "isprimestubs";
+
+package isprimeservice; // package do proto
+
+service IsPrimeService {
+    rpc isPrime(Number) returns (Result);
+}
+
+message Number {
+  int64 num = 1;
+}
+
+message Result {
+  bool prime = 1;
+}

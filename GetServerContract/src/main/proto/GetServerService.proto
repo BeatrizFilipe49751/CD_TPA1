@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "getserverstubs";
+
+package getserverservice; // package do proto
+
+service GetServerService {
+    rpc getPrimeServer(Request) returns (EndPoint);
+}
+
+message Request {
+}
+
+message EndPoint {
+  string ip = 1;
+  int32 port = 2;
+}
