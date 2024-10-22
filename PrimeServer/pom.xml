@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>exgrpc</groupId>
-    <artifactId>PrimesRingServer</artifactId>
+    <artifactId>PrimeServer</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -19,11 +19,32 @@
 
         <dependency>
             <groupId>exgrpc</groupId>
+            <artifactId>RingManagerContract</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>exgrpc</groupId>
             <artifactId>IsPrimeContract</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>exgrpc</groupId>
+            <artifactId>RingMessageContract</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-      </dependencies>
+    </dependencies>
 
     <build>
         <plugins>
@@ -37,7 +58,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>serverapp.Server</mainClass>
+                            <mainClass>serverapp.PrimeServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

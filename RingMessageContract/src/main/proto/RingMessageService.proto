@@ -6,16 +6,19 @@ option java_package = "ringmessagestubs";
 package ringmessageservice; // package do proto
 
 service RingMessageService {
-    rpc ringMessage(Request) returns (Response);
+    rpc ringMessage(stream RingRequest) returns (RingResponse);
 }
 
-message Response {
-  string id = 1;
-  bool is_prime = 2;
+// Message sent between PrimeServers
+message RingRequest {
+    int64 number = 1;   // Number being checked
+    bool hasInfo = 2;   // Whether the information is known
+    bool isPrime = 3;   // The prime result
+    string originIp = 4; // IP of the originating server
+    int32 originPort = 5; // Port of the originating server
 }
 
-message Request {
-  string id = 1;
-  int64 number = 2;
-  bool is_known = 3;
+// Response from the server to the client after going through the ring
+message RingResponse {
+    bool isPrime = 1;
 }

@@ -51,7 +51,7 @@ public class Client {
         do {
             System.out.println();
             System.out.println("    MENU");
-            System.out.println(" 1 - Case 1 - Check if number is prime");
+            System.out.println("1 - Check if number is prime");
             System.out.println("0 - Exit");
             System.out.println();
             System.out.println("Choose an Option?");
@@ -75,7 +75,7 @@ public class Client {
             System.out.println("Requesting PrimeServer EndPoint from RingManager...");
             primeServerEndPoint = serverBlockingStub.getPrimeServer(Request.newBuilder().build());
         } catch (Exception e) {
-            System.out.println("An error occurred");
+            System.out.println("An error occurred: " + e.getMessage());
         } finally {
             if (channel != null) {
                 channel.shutdown();

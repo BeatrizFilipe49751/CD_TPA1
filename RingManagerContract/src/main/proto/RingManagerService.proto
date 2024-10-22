@@ -6,21 +6,10 @@ option java_package = "ringmanagerstubs";
 package ringmanagerservice; // package do proto
 
 service RingManagerService {
-    rpc registServer(EndPoint) returns (Response);
-
-    rpc nextRingserver(Request) returns (EndPoint);
+    rpc registServer(ServerInfo) returns (stream ServerInfo);
 }
 
-message EndPoint {
+message ServerInfo {
   string ip = 1;
   int32 port = 2;
-}
-
-message Response {
-  bool success = 1;
-  string id = 2;
-}
-
-message Request {
-  string id = 1;
 }
