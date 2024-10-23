@@ -2,7 +2,6 @@ package serverapp;
 
 import redis.clients.jedis.Jedis;
 
-import java.util.Arrays;
 
 public class RedisUtil {    //docker run -p 6379:6379 -it redis/redis-stack:latest
     private final Jedis jedis = new Jedis("localhost");
