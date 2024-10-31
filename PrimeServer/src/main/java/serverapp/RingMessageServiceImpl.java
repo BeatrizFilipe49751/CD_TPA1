@@ -40,7 +40,7 @@ public class RingMessageServiceImpl extends RingMessageServiceGrpc.RingMessageSe
                         responseObserver.onCompleted();
                     } else { // Result is not known, launch Docker container
                         System.out.println("Launching Docker container to check if prime...");
-                        boolean prime = dockerUtil.launchPrimeCheckContainer(number);
+                        boolean prime = dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
                         RingResponse ringResponse = RingResponse.newBuilder()
                                 .setIsPrime(prime)
                                 .build();

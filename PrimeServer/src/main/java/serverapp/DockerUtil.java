@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DockerUtil {
     // Returns true if the number is prime, false otherwise
-    public boolean launchPrimeCheckContainer(long number) {
+    public boolean launchPrimeCheckContainer(long number,int redisPort) {
         // arg0 : windows: tcp://localhost:2375 linux: unix:///var/run/docker.sock
         // arg1 : container name
         // arg2 : image name
@@ -21,11 +21,11 @@ public class DockerUtil {
         //arg 5: Redis port on host
         try {
             String HOST_URI = "tcp://localhost:2375"; String containerName = "PrimeServerRedis"; String imageName="isprime";
-            long num=number;//Long.parseLong(number);
-            String redisHostIP=args[4];
-            int redisHostport=Integer.parseInt(args[5]);
+            String redisHostIP="localhost";
             List<String> command=new ArrayList<>();
-            for (int i=3; i < args.length; i++) command.add(args[i]);
+            command.add(String.valueOf(number));
+            command.add(redisHostIP);
+            command.add(String.valueOf(redisPort));
 
             DockerClient dockerclient = DockerClientBuilder
                     .getInstance()
