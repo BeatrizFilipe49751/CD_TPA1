@@ -10,11 +10,12 @@ import ringmessagestubs.RingResponse;
 public class RingMessageServiceImpl extends RingMessageServiceGrpc.RingMessageServiceImplBase {
 
     private final PrimeServer primeServer;
-    private final RedisUtil redisUtil = new RedisUtil();
+    private final RedisUtil redisUtil;
     private final DockerUtil dockerUtil = new DockerUtil();
 
     public RingMessageServiceImpl(PrimeServer primeServer) {
         this.primeServer = primeServer;
+        this.redisUtil = primeServer.getRedisUtil();
     }
 
     @Override
