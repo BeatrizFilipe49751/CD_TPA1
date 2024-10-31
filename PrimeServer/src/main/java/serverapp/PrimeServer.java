@@ -1,5 +1,11 @@
 package serverapp;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
@@ -9,6 +15,7 @@ import ringmanagerstubs.*;
 import ringmanagerstubs.ServerInfo;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -21,12 +28,25 @@ public class PrimeServer {
     private String nextIp;
     private int nextPort;
     private Server server;
+    private final DockerClient dockerClient;
+    private RedisUtil redisUtil;
 
     public PrimeServer(String ringManagerIp, int ringManagerPort, String myIp, int myPort) {
         this.myIp = myIp;
         this.myPort = myPort;
         this.nextIp = null;
         this.nextPort = 0;
+
+        // Initialize Redis Docker client
+        String HOST_URI = System.getProperty("os.name").toLowerCase().contains("win")
+                ? "tcp://localhost:2375"
+                : "unix:///var/run/docker.sock";
+
+        dockerClient = DockerClientBuilder.getInstance()
+                .withDockerHttpClient(new ApacheDockerHttpClient.Builder()
+                        .dockerHost(URI.create(HOST_URI))
+                        .build())
+                .build();
 
         // Create the channel to connect to the RingManager
         channel = ManagedChannelBuilder.forAddress(ringManagerIp, ringManagerPort)
@@ -35,6 +55,35 @@ public class PrimeServer {
 
         // Create the async stub for RingManager calls
         ringManagerStub = RingManagerServiceGrpc.newStub(channel);
+    }
+
+    // Method to launch Redis container
+    public void launchRedisContainer() {
+        String containerName = "RedisCt_" + myPort;
+        String imageName = "redis";
+        int redisHostPort = 6379 + myPort;  // Dynamic port allocation for multiple instances
+
+        try {
+            // Configure port binding
+            HostConfig hostConfig = HostConfig.newHostConfig()
+                    .withPortBindings(PortBinding.parse(redisHostPort + ":6379"));
+
+            // Create and start the container
+            CreateContainerResponse containerResponse = dockerClient.createContainerCmd(imageName)
+                    .withName(containerName)
+                    .withHostConfig(hostConfig)
+                    .exec();
+
+            String redisContainerId = containerResponse.getId();
+            dockerClient.startContainerCmd(redisContainerId).exec();
+
+            System.out.println("Redis container launched on port " + redisHostPort);
+
+            // Create RedisUtil with the Redis port
+            redisUtil = new RedisUtil(redisHostPort);
+        } catch (Exception e) {
+            System.err.println("Failed to launch Redis container: " + e.getMessage());
+        }
     }
 
     // Getter for the next server's IP
@@ -55,6 +104,11 @@ public class PrimeServer {
     // Getter for the current server's port
     public int getPort() {
         return myPort;
+    }
+
+    //Getter for the redisUtil
+    public RedisUtil getRedisUtil() {
+        return redisUtil;
     }
 
     public void registerWithRingManager() {
@@ -145,6 +199,7 @@ public class PrimeServer {
 
         // Create and register the PrimeServer
         PrimeServer primeServer = new PrimeServer(ringManagerIp, ringManagerPort, myIp, myPort);
+        primeServer.launchRedisContainer();
         primeServer.registerWithRingManager();
         primeServer.start();
     }

@@ -12,11 +12,12 @@ import ringmessagestubs.RingResponse;
 
 public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBase {
     private final PrimeServer primeServer;
-    private final RedisUtil redisUtil = new RedisUtil();
+    private final RedisUtil redisUtil;
     private final DockerUtil dockerUtil = new DockerUtil();
 
     public IsPrimeServiceImpl(PrimeServer primeServer) {
         this.primeServer = primeServer;
+        this.redisUtil = primeServer.getRedisUtil();
     }
 
     @Override
