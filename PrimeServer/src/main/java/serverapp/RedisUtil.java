@@ -4,10 +4,11 @@ import redis.clients.jedis.Jedis;
 
 
 public class RedisUtil {
-
     private final Jedis jedis;
+    private final int redisHostPort;
 
     public RedisUtil(int redisHostPort) {
+        this.redisHostPort = redisHostPort;
         this.jedis = new Jedis("localhost", redisHostPort);
     }
 
@@ -26,4 +27,8 @@ public class RedisUtil {
         System.out.println("Saving number " + number + " in Redis, isPrime: " + isPrime);
     }
 
+    // Getter for the redisHostPort
+    public int getRedisPort() {
+        return redisHostPort;
+    }
 }
