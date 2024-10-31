@@ -7,6 +7,7 @@ import ringmanagerstubs.ServerInfo;
 public class RingManagerPrime extends GetServerServiceGrpc.GetServerServiceImplBase {
 
     private final RingManager ringManager;
+    private int currentIndex = 0; // Index of server for load balancing
 
     public RingManagerPrime(RingManager ringManager) {
         this.ringManager = ringManager;
@@ -14,16 +15,17 @@ public class RingManagerPrime extends GetServerServiceGrpc.GetServerServiceImplB
 
     @Override
     public void getPrimeServer(Request request, StreamObserver<EndPoint> responseObserver) {
-        // TODO - Remove this and add load balancing
-        ServerInfo firstServerInfo = ringManager.getFirstServerInfo();
-        if (firstServerInfo == null) {
+        if (ringManager.getServerInfoList().isEmpty()) {
             responseObserver.onError(new Exception("No server registered yet"));
             return;
         }
 
+        ServerInfo serverInfo = ringManager.getServerInfoList().get(currentIndex);
+        currentIndex = (currentIndex + 1) % ringManager.getServerInfoList().size();  // Incrementa e volta ao início, se necessário
+
         EndPoint endPoint = EndPoint.newBuilder()
-                .setIp(firstServerInfo.getIp())
-                .setPort(firstServerInfo.getPort())
+                .setIp(serverInfo.getIp())
+                .setPort(serverInfo.getPort())
                 .build();
         responseObserver.onNext(endPoint);
         responseObserver.onCompleted();
