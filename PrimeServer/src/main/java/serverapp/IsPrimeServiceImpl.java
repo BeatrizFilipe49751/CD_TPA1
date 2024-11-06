@@ -34,7 +34,8 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
             responseObserver.onNext(result);
             responseObserver.onCompleted();
         } else if (primeServer.getNextIp() == null && primeServer.getNextPort() == 0) { // Only one server in the ring
-            boolean prime = dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
+            dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
+            boolean prime = redisUtil.checkIfPrimeInRedis(number).isPrime();
             Result result = Result.newBuilder().setPrime(prime).build();
             responseObserver.onNext(result);
             responseObserver.onCompleted();

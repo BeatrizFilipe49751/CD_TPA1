@@ -10,14 +10,12 @@ public class isPrimeCalculator {
     public static void main(String[] args) {
         long numero = Long.parseLong(args[0]);
         String redisAddress = args[1];
-        int redisport=Integer.parseInt(args[2]);
+        int redisport = Integer.parseInt(args[2]);
         Jedis jedis = new Jedis(redisAddress, redisport);
         isPrimeCalculator isPrimeCalculator = new isPrimeCalculator();
-        if (isPrimeCalculator.isPrime(numero))
-            jedis.set(numero+"","true");
-        else
-            jedis.set(numero+"","false");
-        System.out.println(jedis.get(numero+""));
+        boolean isPrime = isPrimeCalculator.isPrime(numero);
+        jedis.set(String.valueOf(numero), String.valueOf(isPrime));
+        System.out.println("Number " + numero + " is prime: " + isPrime);
     }
 
     // ex: the number 999998727899999 is prime

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DockerUtil {
     // Returns true if the number is prime, false otherwise
-    public boolean launchPrimeCheckContainer(long number,int redisPort) {
+    public void launchPrimeCheckContainer(long number, int redisPort) {
         // arg0 : windows: tcp://localhost:2375 linux: unix:///var/run/docker.sock
         // arg1 : container name
         // arg2 : image name
@@ -20,12 +20,20 @@ public class DockerUtil {
         // arg4 : Redis Host IP
         //arg 5: Redis port on host
         try {
-            String HOST_URI = "tcp://localhost:2375"; String containerName = "PrimeServerRedis"; String imageName="isprime";
-            String redisHostIP="localhost";
-            List<String> command=new ArrayList<>();
+            String HOST_URI = System.getProperty("os.name").toLowerCase().contains("win")
+                    ? "tcp://localhost:2375"
+                    : "unix:///var/run/docker.sock";
+            String containerName = "IsPrimeDocker";
+            String imageName = "isprime";
+            String redisHostIP = "host.docker.internal";
+
+            List<String> command = new ArrayList<>();
+
             command.add(String.valueOf(number));
             command.add(redisHostIP);
             command.add(String.valueOf(redisPort));
+
+            System.out.println("redisPort: " + redisPort);
 
             DockerClient dockerclient = DockerClientBuilder
                     .getInstance()
@@ -41,6 +49,7 @@ public class DockerUtil {
                     .exec();
             System.out.println("ID:" + containerResponse.getId());
             dockerclient.startContainerCmd(containerResponse.getId()).exec();
+
             for(;;) {
                 InspectContainerResponse inspResp = dockerclient
                         .inspectContainerCmd(containerName).exec();
@@ -48,6 +57,8 @@ public class DockerUtil {
                 if (inspResp.getState().getStatus().equals("exited")) break;
                 Thread.sleep(1*1000);
             }
+
+
             // if container is running
             // dockerclient.killContainerCmd(containerName).exec();
             // remove container
@@ -56,10 +67,7 @@ public class DockerUtil {
             ex.printStackTrace();
         }
 
-
-        // TODO - Launch Docker container to check if the number is prime
         System.out.println("Launching Docker container to check if " + number + " is prime...");
-        return true;
     }
 }
 
