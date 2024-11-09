@@ -63,6 +63,6 @@ public class RingManager extends RingManagerServiceGrpc.RingManagerServiceImplBa
             lastObserver.onNext(serverInfoList.get(0));
         }
 
-        System.out.println("Server registered " + request.getPort());
+        System.out.println("Server registered: " + request.getIp() + ":" + request.getPort());
     }
 }

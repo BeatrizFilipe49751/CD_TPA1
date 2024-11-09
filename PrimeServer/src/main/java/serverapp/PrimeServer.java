@@ -66,19 +66,16 @@ public class PrimeServer {
         int redisHostPort = mainPort + myPort;  // Dynamic port allocation for multiple instances
 
         try {
-            System.out.println("Launching Redis container on port " + redisHostPort);
             // Configure port binding
             HostConfig hostConfig = HostConfig.newHostConfig()
                     .withPortBindings(PortBinding.parse(redisHostPort + ":" + mainPort));
 
-            System.out.println("Redis container launched on port " + redisHostPort);
             // Create and start the container
             CreateContainerResponse containerResponse = dockerClient.createContainerCmd(imageName)
                     .withName(containerName)
                     .withHostConfig(hostConfig)
                     .exec();
 
-            System.out.println("ID:" + containerResponse.getId());
             String redisContainerId = containerResponse.getId();
             dockerClient.startContainerCmd(redisContainerId).exec();
 
@@ -114,7 +111,7 @@ public class PrimeServer {
     public RedisUtil getRedisUtil() { return redisUtil; }
 
     // The stub is asynchronous, so its wiser need to create a new thread
-    public void registerWithRingManager() throws InterruptedException {
+    public void registerWithRingManager() {
         // Create a new thread for registration and listening
         Thread t = new Thread(() -> {
             try {
@@ -125,16 +122,15 @@ public class PrimeServer {
                 StreamObserver<ServerInfo> responseObserver = new StreamObserver<>() {
                     @Override
                     public void onNext(ServerInfo nextServerInfo) {
-
                         // When a new server is registered, receive the next server's information
-                        System.out.println("Received information about the next server");
                         nextIp = nextServerInfo.getIp();
                         nextPort = nextServerInfo.getPort();
+                        System.out.println("Next server on the ring: " + nextIp + ":" + nextPort);
                     }
 
                     @Override
                     public void onError(Throwable t) {
-                        System.out.println("Error receiving information about the next server: " + t.getMessage());
+                        System.out.println("Error receiving information about the next server on the ring: " + t.getMessage());
                         latch.countDown();
                     }
 
@@ -151,7 +147,7 @@ public class PrimeServer {
                         .setPort(myPort)
                         .build();
 
-                // Call the `regist(er)Server` method of the RingManager, passing the current server and observer
+                // Call the `registServer` method of the RingManager, passing the current server and observer
                 ringManagerStub.registServer(myInfo, responseObserver);
 
                 // Wait indefinitely for the stream to complete
@@ -166,36 +162,49 @@ public class PrimeServer {
     }
 
     // Method to start the gRPC server
-    public void start() throws IOException {
-        server = ServerBuilder.forPort(myPort)
-                .addService(new IsPrimeServiceImpl(this))
-                .addService(new RingMessageServiceImpl(this))
-                .build()
-                .start();
-        System.out.println("Server started on " + myIp + ":" + myPort);
+    public void start() {
+        try {
+            server = ServerBuilder.forPort(myPort)
+                    .addService(new IsPrimeServiceImpl(this))
+                    .addService(new RingMessageServiceImpl(this))
+                    .build()
+                    .start();
+            System.out.println("Server started on " + myIp + ":" + myPort);
+        } catch (IOException e) {
+            System.out.println("Error starting the server: " + e.getMessage());
+        }
     }
 
     // Method to close the communication channel
     public void shutdown() {
         try {
-            channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+            // Stop and remove the Redis container
+            if (redisUtil != null) {
+                String containerName = "RedisCt_" + myPort;
+                // Stop the container
+                dockerClient.stopContainerCmd(containerName).exec();
+                // Remove the container
+                dockerClient.removeContainerCmd(containerName).exec();
+            }
+
+            channel.shutdown().awaitTermination(2, TimeUnit.SECONDS);
             if (server != null) {
-                server.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                server.shutdown().awaitTermination();
             }
         } catch (InterruptedException e) {
             System.out.println("Error shutting down the server: " + e.getMessage());
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         // Check if the required arguments are provided
         if (args.length < 2) {
             System.out.println("Usage: java -jar PrimeServer.jar <PrimeServerIp> <PrimeServerPort>");
             return;
         }
 
-        // RingManager settings (IP and Port) from the arguments
-        String ringManagerIp = "localhost";
+        // RingManager settings (IP and Port)
+        String ringManagerIp = "34.175.102.70";
         int ringManagerPort = 8500;
 
         // PrimeServer settings (IP and Port) from the arguments
@@ -207,5 +216,7 @@ public class PrimeServer {
         primeServer.launchRedisContainer();
         primeServer.registerWithRingManager();
         primeServer.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(primeServer::shutdown));
     }
 }
