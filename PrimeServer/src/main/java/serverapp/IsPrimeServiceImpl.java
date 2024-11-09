@@ -24,23 +24,25 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
     public void isPrime(Number request, StreamObserver<Result> responseObserver) {
         long number = request.getNum();
 
-        // Check if this server already knows the result (e.g., from Redis)
+        // Check if this server already knows the result (Redis)
         RedisCheckResult redisCheckResult = redisUtil.checkIfPrimeInRedis(number);
         boolean found = redisCheckResult.isFound();
         boolean isPrime = redisCheckResult.isPrime();
 
         if (found) { // Server already knows the result, send it directly to the client
+            System.out.println("Found result in Redis, no need to forward");
             Result result = Result.newBuilder().setPrime(isPrime).build();
             responseObserver.onNext(result);
             responseObserver.onCompleted();
         } else if (primeServer.getNextIp() == null && primeServer.getNextPort() == 0) { // Only one server in the ring
+            System.out.println("Only one server in the ring");
             dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
             boolean prime = redisUtil.checkIfPrimeInRedis(number).isPrime();
             Result result = Result.newBuilder().setPrime(prime).build();
             responseObserver.onNext(result);
             responseObserver.onCompleted();
-        } else {
-            // Forward to the ring and wait for the result
+        } else { // Forward to the ring and wait for the result
+            System.out.println("Forwarding to the ring");
             forwardToRing(number, responseObserver);
         }
     }

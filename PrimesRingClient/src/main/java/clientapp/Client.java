@@ -11,17 +11,13 @@ import java.util.*;
 
 public class Client {
 
-    // RingManager IP - To Change
-    private static final String svcIP = "localhost";
+    // RingManager IP
+    private static final String svcIP = "34.175.102.70";
 
-    // RingManager Port - To Change
+    // RingManager Port
     private static final int svcPort = 8500;
 
     private static ManagedChannel channel;
-    private static IsPrimeServiceGrpc.IsPrimeServiceBlockingStub primeBlockingStub;
-
-    private static GetServerServiceGrpc.GetServerServiceBlockingStub serverBlockingStub;
-
 
     public static void main(String[] args) {
         try {
@@ -58,7 +54,7 @@ public class Client {
             System.out.println();
             System.out.println("Choose an Option?");
             op = scan.nextInt();
-        } while (!((op >= 1 && op <= 4) || op == 0));
+        } while (!(op == 1 || op == 0));
         return op;
     }
 
@@ -71,7 +67,8 @@ public class Client {
             channel = ManagedChannelBuilder.forAddress(svcIP, svcPort)
                     .usePlaintext()
                     .build();
-            serverBlockingStub = GetServerServiceGrpc.newBlockingStub(channel);
+
+            GetServerServiceGrpc.GetServerServiceBlockingStub serverBlockingStub = GetServerServiceGrpc.newBlockingStub(channel);
 
             // Request PrimeServer EndPoint
             System.out.println("Requesting PrimeServer EndPoint from RingManager...");
@@ -93,7 +90,8 @@ public class Client {
             channel = ManagedChannelBuilder.forAddress(primeServerIp, primeServerPort)
                     .usePlaintext()
                     .build();
-            primeBlockingStub = IsPrimeServiceGrpc.newBlockingStub(channel);
+
+            IsPrimeServiceGrpc.IsPrimeServiceBlockingStub primeBlockingStub = IsPrimeServiceGrpc.newBlockingStub(channel);
 
             // Get number input from the user
             Scanner scan = new Scanner(System.in);

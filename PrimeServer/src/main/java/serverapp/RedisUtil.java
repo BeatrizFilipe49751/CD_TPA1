@@ -2,7 +2,6 @@ package serverapp;
 
 import redis.clients.jedis.Jedis;
 
-
 public class RedisUtil {
     private final Jedis jedis;
     private final int redisHostPort;
@@ -13,7 +12,7 @@ public class RedisUtil {
     }
 
     public RedisCheckResult checkIfPrimeInRedis(long number) {
-        System.out.println("Verifying if number " + number + " is in Redis");
+        System.out.println("Checking if number " + number + " is in Redis");
         String search = jedis.get(String.valueOf(number));
 
         boolean found = (search != null);
