@@ -31,22 +31,19 @@ public class RingMessageServiceImpl extends RingMessageServiceGrpc.RingMessageSe
 
                 System.out.println("Server - " + primeServer.getPort());
                 if (primeServer.getIp().equals(originIp) && primeServer.getPort() == originPort) { // This is the original server (looped back)
-                    if (found) { // Result is already known, immediately respond to client
-                        RingResponse ringResponse = RingResponse.newBuilder()
-                                .setIsPrime(isPrime)
-                                .build();
-                        responseObserver.onNext(ringResponse);
-                        responseObserver.onCompleted();
-                    } else { // Result is not known, launch Docker container
+                    final RingResponse.Builder ringResponse = RingResponse.newBuilder();
+                    RingResponse response;
+                    if (found) {
+                        response = ringResponse.setIsPrime(isPrime).build();
+                    } else {
                         System.out.println("Launching Docker container to check if prime...");
                         dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
                         boolean prime = redisUtil.checkIfPrimeInRedis(number).isPrime();
-                        RingResponse ringResponse = RingResponse.newBuilder()
-                                .setIsPrime(prime)
-                                .build();
-                        responseObserver.onNext(ringResponse);
-                        responseObserver.onCompleted();
+                        response = ringResponse.setIsPrime(prime).build();
                     }
+                    responseObserver.onNext(response);
+                    responseObserver.onCompleted();
+
                 } else {
                     if (found) { // Result is already known, add to Redis
                         System.out.println("Adding result to Redis...");

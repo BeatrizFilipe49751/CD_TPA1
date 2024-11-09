@@ -13,8 +13,10 @@ public class Client {
 
     // RingManager IP - To Change
     private static final String svcIP = "localhost";
+
     // RingManager Port - To Change
     private static final int svcPort = 8500;
+
     private static ManagedChannel channel;
     private static IsPrimeServiceGrpc.IsPrimeServiceBlockingStub primeBlockingStub;
 
@@ -31,7 +33,7 @@ public class Client {
 
             while (true) {
                 switch (Menu()) {
-                    case 1:  // Check if number is prime
+                    case 1:  // Check if the number is prime
                         checkPrimeServer(serverIp, serverPort);
                         break;
                     case 0:

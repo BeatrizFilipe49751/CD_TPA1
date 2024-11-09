@@ -68,7 +68,7 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
         StreamObserver<RingResponse> ringResponseObserver = new StreamObserver<>() {
             @Override
             public void onNext(RingResponse response) {
-                // Once response is back from the ring, send it to client
+                // Once the response is back from the ring, send it to a client
                 System.out.println("Received response from ring");
                 Result result = Result.newBuilder().setPrime(response.getIsPrime()).build();
                 responseObserver.onNext(result);
@@ -78,12 +78,13 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
             @Override
             public void onError(Throwable t) {
                 System.err.println("Error forwarding to ring: " + t.getMessage());
-                responseObserver.onError(t);  // Forward error to client
+                responseObserver.onError(t);  // Forward error to a client
             }
 
             @Override
             public void onCompleted() {
                 // Close the channel when done
+                System.err.println("Connection with the ring closed");
                 channel.shutdown();
             }
         };
