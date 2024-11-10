@@ -28,23 +28,30 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
         RedisCheckResult redisCheckResult = redisUtil.checkIfPrimeInRedis(number);
         boolean found = redisCheckResult.isFound();
         boolean isPrime = redisCheckResult.isPrime();
+        Result.Builder result = Result.newBuilder();
+        Result response;
 
-        if (found) { // Server already knows the result, send it directly to the client
+        // The Server already knows the result, send it directly to the client
+        if (found) {
             System.out.println("Found result in Redis, no need to forward");
-            Result result = Result.newBuilder().setPrime(isPrime).build();
-            responseObserver.onNext(result);
-            responseObserver.onCompleted();
-        } else if (primeServer.getNextIp() == null && primeServer.getNextPort() == 0) { // Only one server in the ring
+            response = result.setPrime(isPrime).build();
+
+        } else  // Check if there is only one server in the ring
+            if (primeServer.getNextIp() == null && primeServer.getNextPort() == 0) {
             System.out.println("Only one server in the ring");
             dockerUtil.launchPrimeCheckContainer(number,redisUtil.getRedisPort());
             boolean prime = redisUtil.checkIfPrimeInRedis(number).isPrime();
-            Result result = Result.newBuilder().setPrime(prime).build();
-            responseObserver.onNext(result);
-            responseObserver.onCompleted();
-        } else { // Forward to the ring and wait for the result
+            response = Result.newBuilder().setPrime(prime).build();
+
+
+        } else /* Forward to the next ring and wait for the result */ {
             System.out.println("Forwarding to the ring");
             forwardToRing(number, responseObserver);
+            return;
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     private void forwardToRing(long number, StreamObserver<Result> responseObserver) {
@@ -60,10 +67,10 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
         // Create the RingRequest to forward
         RingRequest ringRequest = RingRequest.newBuilder()
                 .setNumber(number)
-                .setOriginIp(primeServer.getIp()) // Pass the original server IP
-                .setOriginPort(primeServer.getPort()) // Pass the original server port
-                .setHasInfo(false) // This server doesn't know the result
-                .setIsPrime(false) // Default value
+                .setOriginIp(primeServer.getIp())       // Pass the original server IP
+                .setOriginPort(primeServer.getPort())   // Pass the original server port
+                .setHasInfo(false)                      // This server does not know the result
+                .setIsPrime(false)                      // Default value
                 .build();
 
         // Forward the request to the ring
@@ -79,6 +86,7 @@ public class IsPrimeServiceImpl extends IsPrimeServiceGrpc.IsPrimeServiceImplBas
 
             @Override
             public void onError(Throwable t) {
+                // Forward error to the client
                 System.err.println("Error forwarding to ring: " + t.getMessage());
                 responseObserver.onError(t);  // Forward error to a client
             }
