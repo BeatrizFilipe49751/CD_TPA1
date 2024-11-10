@@ -49,9 +49,9 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 4. Pressupostos
 > [!CAUTION]
-> RingManager está ativo em um IP e port fixos e bem conhecidos (**34.175.102.70:8500**).
-> Sistema suporta o registo de novos primeServers sem interromper o funcionamento.
-> Sistema não suporta a remoção de primeServers já registados.
+> - RingManager está ativo em um IP e port fixos e bem conhecidos (**34.175.102.70:8500**).
+> - Sistema suporta o registo de novos primeServers sem interromper o funcionamento.
+> - Sistema não suporta a remoção de primeServers já registados.
 
 ---
 
