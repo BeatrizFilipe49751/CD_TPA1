@@ -12,44 +12,60 @@ suporte a balanceamento de carga na execução de pedidos por parte de múltiplo
 pedido de um cliente pode envolver interação com outros servidores ou mesmo exigir
 processamento realizado em containers Docker lançado pelos servidores gRPC.
 
-
-
 ### 2. Descrição
 
 > [!NOTE]
-> - O sistema a implementar é um sistema em anel de números primos.  
-> - O sistema é composto por um servidor principal e por um conjunto de servidores secundários.  
-> - Um conjunto de servidores secundários cooperam para determinar se um número é primo ou não.  
-> - Os clientes possuem um programa que segue um contrato protobuf 
-> que lhes permite interagir com um dos servidores secundários.  
-
-### 3. Funcionamento
-
-> [!NOTE]
-> - O servidor principal:
->   - interligar os servidores secundários.
->   - não é responsável por determinar se um número é primo ou não.
-> - Os servidores secundários:
->   - São responsáveis por determinar se um número é primo ou não.
->   - Quando iniciam também iniciam um dicionário Redis para armazenar os números primos já calculados.
->   - Podem lançar containers Docker para calcular se um número é primo ou não.
+> O Sistema **PrimesRing** é um anel de servidores distribuídos. Ele é composto por:
+> 
+> - O servidor principal (**RingManager**):
+>   - Regista e interliga os servidores secundários.
+>   - Distribui os clientes pelos servidores secundários.
+> - Os servidores secundários (**PrimeServer**):
+>   - São responsáveis por determinar se um número é primo ou não, com a ajuda de containers Docker.
+>   - Ao serem inicializados, iniciam um dicionário Redis onde armazenam os números primos já calculados.
 > - Os clientes:
->   - Podem-se conectar a um dos servidores secundários.
->   - Podem perguntar a um servidor secundário para determinar se um número é primo ou não.
+>   - Conectam-se ao servidor principal, que os redireciona para um secundário.
+>   - Perguntam a um servidor secundário se um número é primo ou não.
 
 ---
 
-### 4. Instalação
+### 3. Fluxo de Funcionamento
+
+> [!TIP]
+> 1. O cliente conecta-se ao RingManager.
+> 2. O RingManager redireciona o cliente para um PrimeServer.
+> 3. O cliente faz um pedido ao PrimeServer para determinar se um número é primo ou não.
+> 4. O PrimeServer verifica se o número já foi armazenado no seu Redis.
+>    - Número encontrado, o PrimeServer responde imediatamente ao cliente com o resultado.
+>    - Número não encontrado, o PrimeServer envia a mensagem para o anel.
+> 5. Cada PrimeServer vê na mensagem se o resultado já foi encontrado.
+>    - Resultado já encontrado, atualiza o seu Redis e reenvia a mensagem para o próximo servidor.
+>    - Resultado ainda não encontrado, verifica o seu Redis e, se encontrado, atualiza a mensagem e reenvia para o próximo servidor.
+> 6. A mensagem chega ao PrimeServer que fez o pedido inicial.
+>    - Resultado encontrado, o PrimeServer responde imediatamente ao cliente.
+>    - Resultado não encontrado, o PrimeServer lança um container Docker para calcular se o número é primo ou não e responde ao cliente.
+
+---
+
+### 4. Pressupostos
+> [!CAUTION]
+> RingManager está ativo em um IP e port fixos e bem conhecidos (**34.175.102.70:8500**).
+> Sistema suporta o registo de novos primeServers sem interromper o funcionamento.
+> Sistema não suporta a remoção de primeServers já registados.
+
+### 5. Configuração e Execução
 
 > [!WARNING]
-> Requisitos:
-> - Instalar o [Docker](https://docs.docker.com/get-docker/):
->   - Após a instalação, vá a definições e ative a opção `[X] Expose daemon on tcp://localhost:2375 without TLS` e guarde.
+> 1. Colocar em execução a VM do RingManager:
+>    - No terminal, correr `java -jar RingManagerServer-1.0-jar-with-dependencies.jar`.
+>
+> 2. Colocar em execução a VM(s) do(s) PrimeServer(s):
+>    - No terminal, correr `sudo java -jar PrimeServer-1.0-jar-with-dependencies.jar <vm external ip> <port>`.
 > 
-> - Com o ambiente Docker aberto, 
-> abra um terminal e corra `docker run -d --name PrimeServerRedis -p 6000:6379 redis` 
-> para iniciar o servidor Redis.
+> 3. Colocar em execução o cliente:
+>    - No terminal, correr `java -jar PrimesRingClient-1.0-jar-with-dependencies.jar`.
 
-[TODO] Completar
+---
 
-
+### 6. Contratos
+[TODO]
