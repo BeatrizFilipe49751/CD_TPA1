@@ -52,7 +52,7 @@ public class DockerUtil {
                 for(;;) {
                     InspectContainerResponse inspResp = dockerclient
                             .inspectContainerCmd(containerName).exec();
-                    if (inspResp.getState().getStatus().equals("exited")) break;
+                    if ("exited".equals(inspResp.getState().getStatus())) break;
                     Thread.sleep(1000);
                 }
 
