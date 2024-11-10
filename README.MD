@@ -70,7 +70,7 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 6. Contratos Protobuf
 
-> [!INFO]
+> [!NOTE]
 > 1. **GetServerContract**:
 >    - **getPrimeServer**(Request) returns (EndPoint)
 >      - Request: `void`
