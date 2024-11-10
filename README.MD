@@ -3,7 +3,6 @@
 ---
 ## T.P.A. 1 — Primes Ring
 
-
 ### 1. Objetivo
 
 > [!NOTE]  
