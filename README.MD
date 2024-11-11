@@ -8,6 +8,7 @@
 Utilização do middleware gRPC na implementação de um sistema com múltiplos servidores de suporte a balanceamento de carga na execução de pedidos por parte de múltiplos clientes.  
 Cada pedido de um cliente pode envolver interação com outros servidores ou mesmo exigir processamento realizado em containers Docker lançado pelos servidores gRPC.
 
+---
 
 ### 2. Descrição
 
