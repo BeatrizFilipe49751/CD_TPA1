@@ -53,8 +53,8 @@ O Sistema **PrimesRing** é um anel de servidores distribuídos. Ele é composto
   
 
 6. A mensagem chega ao `PrimeServer` que fez o pedido inicial. Se o resultado:
-   - For encontrado, o servidor responde imediatamente ao cliente.
-   - Não for encontrado, o servidor lança um container _Docker_ para calcular se o número é primo ou não, e responde ao cliente.
+   - Foi encontrado, o servidor responde imediatamente ao cliente.
+   - Não foi encontrado, o servidor lança um container _Docker_ para calcular se o número é primo ou não, e responde ao cliente.
 
 ---
 
@@ -65,7 +65,7 @@ O Sistema **PrimesRing** é um anel de servidores distribuídos. Ele é composto
 - Sistema não suporta a remoção de `PrimeServer`'s já registados.
 
 *_Nota_: Se por alguma razão o `RingManagerServer` tiver outro IP,
-o sistema cliente (`PrimesRingClient`) tem automatização para apanhá-lo.
+o sistema cliente (`PrimesRingClient`) e o servidor (`PrimeServer`) têm automatização para apanhá-lo.
 
 ---
 
