@@ -13,6 +13,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import ringmanagerstubs.*;
 import ringmanagerstubs.ServerInfo;
+import utils.GoogleCloudUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -198,18 +199,24 @@ public class PrimeServer {
 
     public static void main(String[] args) {
         // Check if the required arguments are provided
-        if (args.length < 2) {
-            System.out.println("Usage: java -jar PrimeServer.jar <PrimeServerIp> <PrimeServerPort>");
+        if (args.length < 1) {
+            System.out.println("Usage: java -jar PrimeServer.jar <PrimeServerPort>");
             return;
         }
 
-        // RingManager settings (IP and Port)
-        String ringManagerIp = "34.175.102.70";
-        int ringManagerPort = 8500;
+        int ringManagerPort = GoogleCloudUtils.getRingManagerPort();
 
-        // PrimeServer settings (IP and Port) from the arguments
-        String myIp = args[0];
-        int myPort = Integer.parseInt(args[1]);
+        String ringManagerIp;
+        String myIp;
+        try {
+            myIp = GoogleCloudUtils.getExternalIp();
+            ringManagerIp = GoogleCloudUtils.getRingManagerIp();
+        } catch (Exception e) {
+            System.out.println("Error getting the external IP: " + e.getMessage());
+            return;
+        }
+        // PrimeServer Port from the arguments
+        int myPort = Integer.parseInt(args[0]);
 
         // Create and register the PrimeServer
         PrimeServer primeServer = new PrimeServer(ringManagerIp, ringManagerPort, myIp, myPort);

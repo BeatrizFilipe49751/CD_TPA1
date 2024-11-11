@@ -5,15 +5,12 @@
 
 ### 1. Objetivo
 
-> [!NOTE]  
-> Utilização do middleware gRPC na implementação de um sistema com múltiplos servidores de
-suporte a balanceamento de carga na execução de pedidos por parte de múltiplos clientes. Cada
-pedido de um cliente pode envolver interação com outros servidores ou mesmo exigir
-processamento realizado em containers Docker lançado pelos servidores gRPC.
+> Utilização do middleware gRPC na implementação de um sistema com múltiplos servidores de suporte a balanceamento de carga na execução de pedidos por parte de múltiplos clientes.  
+> Cada pedido de um cliente pode envolver interação com outros servidores ou mesmo exigir processamento realizado em containers Docker lançado pelos servidores gRPC.
+
 
 ### 2. Descrição
 
-> [!NOTE]
 > O Sistema **PrimesRing** é um anel de servidores distribuídos. Ele é composto por:
 > 
 > - O servidor principal (**RingManager**):
@@ -30,7 +27,6 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 3. Fluxo de Funcionamento
 
-> [!TIP]
 > 1. O cliente conecta-se ao RingManager.
 > 2. O RingManager redireciona o cliente para um PrimeServer.
 > 3. O cliente faz um pedido ao PrimeServer para determinar se um número é primo ou não.
@@ -47,7 +43,7 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 ---
 
 ### 4. Pressupostos
-> [!CAUTION]
+
 > - RingManager está ativo em um IP e port fixos e bem conhecidos (**34.175.102.70:8500**).
 > - Sistema suporta o registo de novos primeServers sem interromper o funcionamento.
 > - Sistema não suporta a remoção de primeServers já registados.
@@ -56,12 +52,11 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 5. Configuração e Execução
 
-> [!WARNING]
 > 1. Colocar em execução a VM do RingManager:
 >    - No terminal, correr `java -jar RingManagerServer-1.0-jar-with-dependencies.jar`.
 >
 > 2. Colocar em execução a VM(s) do(s) PrimeServer(s):
->    - No terminal, correr `sudo java -jar PrimeServer-1.0-jar-with-dependencies.jar <vm external ip> <port>`.
+>    - No terminal, correr `sudo java -jar PrimeServer-1.0-jar-with-dependencies.jar <port>`.
 > 
 > 3. Colocar em execução o cliente:
 >    - No terminal, correr `java -jar PrimesRingClient-1.0-jar-with-dependencies.jar`.
@@ -70,7 +65,6 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 6. Contratos Protobuf
 
-> [!NOTE]
 > 1. **GetServerContract**:
 >    - **getPrimeServer**(Request) returns (EndPoint)
 >      - Request: `void`
@@ -110,7 +104,6 @@ processamento realizado em containers Docker lançado pelos servidores gRPC.
 
 ### 7. Autores
 
-> [!Important]
 > Grupo 9:
 > - **Douglas Incáo**, 47269 (a47269@alunos.isel.pt)
 > - **Beatriz Filipe**, 49751 (a49751@alunos.isel.pt)

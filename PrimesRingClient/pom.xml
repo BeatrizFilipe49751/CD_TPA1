@@ -27,8 +27,12 @@
             <artifactId>GetServerContract</artifactId>
             <version>1.0</version>
         </dependency>
-
-      </dependencies>
+        <dependency>
+            <groupId>utils</groupId>
+            <artifactId>GoogleCloudUtils</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

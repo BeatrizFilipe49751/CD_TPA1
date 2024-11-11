@@ -5,17 +5,23 @@ import getserverstubs.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import isprimestubs.Number;
-
 import java.util.*;
-
+import utils.GoogleCloudUtils;
 
 public class Client {
 
-    // RingManager IP
-    private static final String svcIP = "34.175.102.70";
+    // RingManager IP and Port
+    private static final String svcIP;
+    private static final int svcPort;
 
-    // RingManager Port
-    private static final int svcPort = 8500;
+    static {
+        try {
+            svcIP = GoogleCloudUtils.getRingManagerIp();
+            svcPort = GoogleCloudUtils.getRingManagerPort();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static ManagedChannel channel;
 
@@ -101,12 +107,7 @@ public class Client {
             // Make RPC call to PrimeServer
             Result res = primeBlockingStub.isPrime(Number.newBuilder().setNum(num).build());
 
-            // Display result
-            if (res.getPrime()) {
-                System.out.println(num + " is a prime number.");
-            } else {
-                System.out.println(num + " is not a prime number.");
-            }
+            System.out.print("Result: "+num+" is "+ (res.getPrime() ? "a prime number." : "not a prime number."));
 
         } catch (Exception e) {
             System.out.println("An error occurred");
