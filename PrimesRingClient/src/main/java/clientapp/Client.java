@@ -102,7 +102,7 @@ public class Client {
             // Get number input from the user
             Scanner scan = new Scanner(System.in);
             System.out.print("Enter a number to check if it's prime: ");
-            int num = scan.nextInt();
+            long num = scan.nextLong();
 
             // Make RPC call to PrimeServer
             Result res = primeBlockingStub.isPrime(Number.newBuilder().setNum(num).build());
